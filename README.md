@@ -2,7 +2,7 @@
 
 `kmods-via-containers` is a framework for building and delivering
 kernel modules via containers. This implementation for this framework
-was inspired by the work done by Joe Doss on 
+was inspired by the work done by Joe Doss on
 [atomic-wireguard](https://github.com/jdoss/atomic-wireguard.git).
 
 This framework relies on 3 independently developed pieces.
@@ -47,19 +47,19 @@ It must define a few functions in the bash library:
 To give a full illustration of how to use this framework, a full
 example is worth a thousand words. In this example I will use
 
-1. The [kmods-via-containers](https://github.com/kmods-via-containers/kmods-via-containers) software (this repo)
-2. [simple-kmod](https://github.com/kmods-via-containers/simple-kmod)
+1. The [kmods-via-containers](https://github.com/raballew/kmods-via-containers) software (this repo)
+2. [simple-kmod](https://github.com/raballew/simple-kmod)
     - A simple kmod source code repo
     - Contains the source code for two modules (`simple-kmod` and `simple-procfs-kmod`)
     - Contains the source code for one userspace tool (`spkut`)
         - Compiled from `simple-procfs-kmod-userspace-tool.c`
-3. [kvc-simple-kmod](https://github.com/kmods-via-containers/kvc-simple-kmod)
+3. [kvc-simple-kmod](https://github.com/raballew/kvc-simple-kmod)
     - An instance of a KVC framework repo that shows how
       to build and deliver the modules from the `simple-kmod`
       source code repository
 
 So we'll build the modules (`simple-kmod` and `simple-procfs-kmod`)
-and the userspace tool (`spkut`) inside of a container by using the 
+and the userspace tool (`spkut`) inside of a container by using the
 `build_kmods()` function from the library provided by the `kvc-simple-kmod`
 repo.
 
@@ -67,23 +67,23 @@ In this case `build_kmods()` calls out to the `CONTAINER_RUNTIME`
 defined by the `kmods-via-containers.conf` file (default of `podman`)
 to perform a container build using the `KMOD_CONTAINER_BUILD_CONTEXT`
 and the container build file specified by `KMOD_CONTAINER_BUILD_FILE`.
-Both of these vars are defined in the `kvc-simple-kmod.conf` file. 
+Both of these vars are defined in the `kvc-simple-kmod.conf` file.
 
-For `kvc-simple-kmod` the config file build content defaults to 
-`git://github.com/kmods-via-containers/kvc-simple-kmod.git` and the build file
-defaults to [`Dockerfile.fedora`](https://github.com/kmods-via-containers/kvc-simple-kmod/blob/master/Dockerfile.fedora).
+For `kvc-simple-kmod` the config file build content defaults to
+`git://github.com/raballew/kvc-simple-kmod.git` and the build file
+defaults to [`Dockerfile.fedora`](https://github.com/raballew/kvc-simple-kmod/blob/master/Dockerfile.fedora).
 
 There are a few other values defined in
-[the config file](https://github.com/kmods-via-containers/kvc-simple-kmod/blob/master/simple-kmod.conf)
+[the config file](https://github.com/raballew/kvc-simple-kmod/blob/master/simple-kmod.conf)
 of the `kvc-simple-kmod` example. Here are all of them:
 
-- `KMOD_CONTAINER_BUILD_CONTEXT="git://github.com/kmods-via-containers/kvc-simple-kmod.git"`
+- `KMOD_CONTAINER_BUILD_CONTEXT="git://github.com/raballew/kvc-simple-kmod.git"`
 - `KMOD_CONTAINER_BUILD_FILE=Dockerfile.fedora`
 - `KMOD_SOFTWARE_VERSION=dd1a7d4`
 - `KMOD_NAMES="simple-kmod simple-procfs-kmod"`
 
 The `KMOD_SOFTWARE_VERSION` gives a clue to the library about what version of the
-`simple_kmod` softwre to use. This can be changed by the end user to test out 
+`simple_kmod` softwre to use. This can be changed by the end user to test out
 different versions.
 
 The `KMOD_NAMES` define the list of kernel modules that the user would
@@ -96,7 +96,7 @@ Install the kmods-via-containers files on your system by running `make install`.
 This will place the executable config file and service on your system.
 
 ```
-git clone https://github.com/kmods-via-containers/kmods-via-containers
+git clone https://github.com/raballew/kmods-via-containers
 cd kmods-via-containers
 sudo make install
 ```
@@ -113,7 +113,7 @@ instance library and config file as well as the userspace wrapper
 onto the system.
 
 ```
-git clone https://github.com/kmods-via-containers/kvc-simple-kmod
+git clone https://github.com/raballew/kvc-simple-kmod
 cd kvc-simple-kmod
 sudo make install
 ```
@@ -125,7 +125,7 @@ Now instantiate an instance of `kmods-via-containers@.service` for
 sudo systemctl enable kmods-via-containers@simple-kmod.service
 ```
 
-We can now either call the service to build and insert the kernel 
+We can now either call the service to build and insert the kernel
 module(s) or we can wait until the next reboot when the service
 will detect there is no built module container and execute the build
 then. We can also call the `kmods-via-containers` script directly
@@ -163,7 +163,7 @@ simple_kmod            16384  0
 $ dmesg | grep 'Hello world'
 [ 6420.761332] Hello world from simple_kmod.
 
-$ sudo cat /proc/simple-procfs-kmod 
+$ sudo cat /proc/simple-procfs-kmod
 simple-procfs-kmod number = 0
 ```
 
@@ -184,10 +184,10 @@ simple-procfs-kmod number = 44
 
 First create a base ignition config that you'd like to use. It will
 contain the ssh pub key to add to the authorized keys file for the
-`core` user and also a systemd unit (`require-simple-kmod.service` that 
+`core` user and also a systemd unit (`require-simple-kmod.service` that
 **requires** `kmods-via-containers@simple-kmod.service`.
 The systemd unit is a workaround for a an
-[upstream bug](https://github.com/coreos/ignition/issues/586) 
+[upstream bug](https://github.com/coreos/ignition/issues/586)
 and makes sure the `kmods-via-containers@simple-kmod.service` gets
 started on boot.
 
@@ -224,11 +224,11 @@ we want to deliver via Ignition:
 
 ```
 FAKEROOT=$(mktemp -d)
-git clone https://github.com/kmods-via-containers/kmods-via-containers
+git clone https://github.com/raballew/kmods-via-containers
 cd kmods-via-containers
 make install DESTDIR=${FAKEROOT}/usr/local CONFDIR=${FAKEROOT}/etc/
 cd ..
-git clone https://github.com/kmods-via-containers/kvc-simple-kmod
+git clone https://github.com/raballew/kvc-simple-kmod
 cd kvc-simple-kmod
 make install DESTDIR=${FAKEROOT}/usr/local CONFDIR=${FAKEROOT}/etc/
 cd ..
@@ -272,7 +272,7 @@ simple-procfs-kmod number = 0
 simple-procfs-kmod number = 44
 ```
 
-# Steps for OpenShift (RHCOS) via the [MCO](https://github.com/openshift/machine-config-operator) 
+# Steps for OpenShift (RHCOS) via the [MCO](https://github.com/openshift/machine-config-operator)
 
 Start with a base MCO yaml snippet that looks like:
 
@@ -314,11 +314,11 @@ we want to deliver via Ignition:
 
 ```
 FAKEROOT=$(mktemp -d)
-git clone https://github.com/kmods-via-containers/kmods-via-containers
+git clone https://github.com/raballew/kmods-via-containers
 cd kmods-via-containers
 make install DESTDIR=${FAKEROOT}/usr/local CONFDIR=${FAKEROOT}/etc/
 cd ..
-git clone https://github.com/kmods-via-containers/kvc-simple-kmod
+git clone https://github.com/raballew/kvc-simple-kmod
 cd kvc-simple-kmod
 make install DESTDIR=${FAKEROOT}/usr/local CONFDIR=${FAKEROOT}/etc/
 cd ..
